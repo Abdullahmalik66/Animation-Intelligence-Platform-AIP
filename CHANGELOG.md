@@ -8,8 +8,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [3.0.0] — 2026-09-07
 
-The project is now a product: a zero-config linter for web animation code,
-installable from PyPI and runnable via `npx aip-cli`.
+The project is now a product: an agent-agnostic animation intelligence layer
+for coding agents, delivered as a zero-config linter for web animation code.
+Installable from PyPI, runnable via `npx aip-cli`.
 
 ### Added
 
@@ -22,16 +23,28 @@ installable from PyPI and runnable via `npx aip-cli`.
   request, based on the project's actual `package.json` and lockfile.
 - `aip context` — packaged, section-level animation knowledge (15 topics) served
   on demand; ships inside the wheel, never copied into user projects.
-- `aip init` / `aip init --remove` — installs the Claude Code animation skill
-  as exactly one file, and removes it cleanly.
+- Multi-agent `aip init` / `aip init --remove` — one canonical instruction body
+  delivered to Claude Code, GitHub Copilot, Cursor, Windsurf, Cline/Roo Code,
+  OpenAI Codex (managed block in `AGENTS.md`), and Gemini CLI (managed block in
+  `GEMINI.md`). Supports `--global` and `--force`; managed blocks are edited
+  surgically, user content is never touched.
 - `npx aip-cli` shim — bootstraps a private Python environment on first run.
-- Knowledge pack (skills, references, manifests, schemas) bundled as package
-  data under `aip/data/`.
+- Knowledge pack (7 library skills + 5 references) bundled as package data
+  under `aip/data/`.
+- CI check that every `aip context` topic resolves against the knowledge pack.
+
+### Changed
+
+- Wheel is 114 KB with zero runtime dependencies (Python stdlib only).
 
 ### Removed
 
-- Per-agent adapter directories (`adapters/`) — superseded by `aip init` and
-  `aip context`; other agent integrations are not yet shipped.
+- Legacy provider architecture: `gateway`, `orchestrator`, `assembler`,
+  `backends/`, `retrieval`, `validators`, `schema_check`, `inventory`.
+- Manifests, JSON schemas, example projects, and per-framework integration
+  docs from the knowledge pack.
+- `validate-skills` workflow — it enforced the pre-3.0 prompt-file layout that
+  no longer exists; the topic-resolution check replaces it.
 
 ---
 

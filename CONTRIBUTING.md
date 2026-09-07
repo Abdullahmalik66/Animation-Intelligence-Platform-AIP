@@ -13,8 +13,8 @@ Thanks for helping make `aip` better.
 ## Getting started
 
 ```bash
-git clone https://github.com/Abdullahmalik66/Animation-Intelligence-Platform-AIP-
-cd Animation-Intelligence-Platform-AIP-
+git clone https://github.com/Abdullahmalik66/aip
+cd aip
 python3 -m unittest discover tests -v
 python3 -m aip check tests/fixtures/bad-animations.css
 ```
