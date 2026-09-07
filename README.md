@@ -1,6 +1,6 @@
 <div align="center">
 
-# AIP
+# Animation Intelligence Platform (AIP)
 
 **The zero-config linter for web animation code.**
 
