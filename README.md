@@ -1,12 +1,26 @@
+<div align="center">
+
 # AIP
 
-A zero-config linter for web animation code — catches the memory leaks, accessibility violations, layout thrashing, and performance bugs that tests miss, and shows the fix.
+**The zero-config linter for web animation code.**
+
+Catches the memory leaks, accessibility violations, layout thrashing, and
+performance bugs that tests miss — and shows the fix.
 
 ```bash
 npx aip-cli check src/
 ```
 
-```
+[![CI](https://github.com/Abdullahmalik66/Animation-Intelligence-Platform-AIP/actions/workflows/ci.yml/badge.svg)](https://github.com/Abdullahmalik66/Animation-Intelligence-Platform-AIP/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
+![Node](https://img.shields.io/badge/node-16%2B-339933?logo=nodedotjs&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+No AI. No network. No API keys. No config file. Zero dependencies.
+
+</div>
+
+```text
 bad-animations.jsx
     13:5  error    ScrollTrigger created but never reverted or killed. This leaks
                    on unmount and duplicates on remount.            leak/gsap-no-revert
@@ -22,25 +36,66 @@ bad-animations.jsx
 Every finding names its rule and states the fix on the `→` line. Exit code is
 `1` when there are errors, so it drops straight into CI.
 
-No AI. No network. No API keys. No config file. Zero dependencies.
-
 ---
 
 ## Why AIP Exists
 
-Animation bugs are uniquely invisible. They don't throw. Tests pass. Types
-check. The page just gets slower with every navigation — or it makes a user
-with a vestibular disorder physically sick.
-
-Existing tooling doesn't reach them:
+Animation bugs are uniquely invisible: they don't throw, tests pass, and the
+page just gets slower with every navigation — or it makes a user with a
+vestibular disorder physically sick.
 
 - ESLint doesn't know a GSAP timeline needs `revert()`.
 - Lighthouse tells you the page is slow, not which `@keyframes` did it.
 - Type checkers can't see that your `IntersectionObserver` outlives the component.
 
-AIP encodes the review checklist of an experienced animation engineer —
-lifecycle cleanup, accessibility, performance, asset security — and runs it in
-milliseconds, on every commit.
+AIP encodes the review checklist of an experienced animation engineer and runs
+it in milliseconds, on every commit.
+
+---
+
+## Before / After
+
+```jsx
+// ❌ Before — leaks on every unmount, no reduced-motion path
+useEffect(() => {
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsap.timeline({
+    scrollTrigger: { trigger: '.card', start: 'top 80%' },
+  })
+    .from('.card', { y: 40, opacity: 0 })
+    .to('.card', { opacity: 1 });
+}, []);
+```
+
+```text
+before.jsx
+  9:5  error  Animation defined with no `prefers-reduced-motion` fallback. …  a11y/no-reduced-motion-fallback
+              → Add @media (prefers-reduced-motion: reduce) { ... }
+  9:5  error  gsap.timeline() created but never reverted or killed. This leaks
+              on unmount and duplicates on remount.                           leak/gsap-no-revert
+              → Return () => ctx.revert() from your effect.
+
+2 problems (2 errors, 0 warnings)
+```
+
+```jsx
+// ✅ After — exit code 0
+useEffect(() => {
+  gsap.registerPlugin(ScrollTrigger);
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const ctx = gsap.context(() => {
+    gsap.timeline({
+      scrollTrigger: { trigger: '.card', start: 'top 80%' },
+    })
+      .from('.card', { y: 40, opacity: 0 })
+      .to('.card', { opacity: 1 });
+  });
+  return () => ctx.revert();
+}, []);
+```
 
 ---
 
@@ -159,54 +214,51 @@ aip context           # list every topic
 15 packaged topics (7 animation libraries plus cross-cutting references) ship
 inside the wheel. Knowledge is never copied into your repository.
 
-### Integrations
-
-One command installs the routing, context, and check loop into your coding
-agent:
-
-```bash
-aip init                          # Claude Code (default)
-aip init --agent copilot          # GitHub Copilot
-aip init --agent cursor           # Cursor
-aip init --agent windsurf         # Windsurf
-aip init --agent cline            # Cline / Roo Code
-aip init --agent codex            # Codex & generic agents (AGENTS.md block)
-aip init --agent gemini           # Gemini CLI (GEMINI.md block)
-aip init --agent all              # everything above
-```
-
-| Agent | File written |
-| --- | --- |
-| Claude Code | `.claude/skills/animation/SKILL.md` |
-| GitHub Copilot | `.github/instructions/animation.instructions.md` |
-| Cursor | `.cursor/rules/animation.mdc` |
-| Windsurf | `.windsurf/rules/animation.md` |
-| Cline / Roo Code | `.clinerules/animation.md` |
-| Codex & generic agents | managed block in `AGENTS.md` |
-| Gemini CLI | managed block in `GEMINI.md` |
-
-Each install writes exactly one file — or, for `AGENTS.md`/`GEMINI.md`, a
-marker-delimited managed block. Your own content is never touched.
-`aip init --agent <x> --remove` takes it back out. `--global` installs to your
-home directory instead of the project.
-
 ---
 
-## Example Agent Workflow
+## Agent Support
 
-From then on, when you ask your agent for animation work, it:
+One command installs the full loop into your coding agent:
 
-1. runs `aip route "<request>"` to pick a technology based on what your project
-   actually has installed,
-2. runs `aip context <key>` to load only the lifecycle and accessibility rules
-   for that library,
-3. writes the code,
-4. runs `aip check` and repairs its own findings (max 3 attempts) before
-   showing you anything.
+```bash
+aip init --agent all        # or one of: claude (default) · copilot · cursor · windsurf · cline · codex · gemini
+```
 
-Any agent without a dedicated integration gets the same loop through
-`aip check --format json`: each finding carries `rule`, `message`, and
-`fix_hint`, which is everything a model needs to repair its own output.
+| Agent | AIP writes | Route | Context | Check | Repair |
+| --- | --- | :-: | :-: | :-: | :-: |
+| Claude Code | `.claude/skills/animation/SKILL.md` | ✅ | ✅ | ✅ | ✅ |
+| GitHub Copilot | `.github/instructions/animation.instructions.md` | ✅ | ✅ | ✅ | ✅ |
+| Cursor | `.cursor/rules/animation.mdc` | ✅ | ✅ | ✅ | ✅ |
+| Windsurf | `.windsurf/rules/animation.md` | ✅ | ✅ | ✅ | ✅ |
+| Cline / Roo Code | `.clinerules/animation.md` | ✅ | ✅ | ✅ | ✅ |
+| OpenAI Codex | managed block in `AGENTS.md` | ✅ | ✅ | ✅ | ✅ |
+| Gemini CLI | managed block in `GEMINI.md` | ✅ | ✅ | ✅ | ✅ |
+
+Each install is exactly one file — or a marker-delimited managed block; your
+own content is never touched. `aip init --agent <x> --remove` takes it back
+out. `--global` installs to your home directory.
+
+### The self-healing loop
+
+```text
+developer request
+      ↓
+aip route        →  technology + context keys
+      ↓
+aip context      →  lifecycle + accessibility rules
+      ↓
+agent writes the code
+      ↓
+aip check        →  findings + fix hints
+      ↓
+agent repairs    (max 3 attempts)
+      ↓
+clean ✓          →  presented to you
+```
+
+Any agent without an integration gets the same loop through
+`aip check --format json`: every finding carries `rule`, `message`, and
+`fix_hint` — everything a model needs to repair its own output.
 
 ---
 
@@ -222,36 +274,21 @@ Any agent without a dedicated integration gets the same loop through
 Failing the build on `leak/*` and `a11y/*` is the point. Those are the classes
 of bug that are effectively invisible in review.
 
----
-
-## Supported Platforms
-
-- **Agents:** Claude Code, GitHub Copilot, Cursor, Windsurf, Cline/Roo Code,
-  OpenAI Codex, Gemini CLI — plus any agent via `aip check --format json`.
-- **Languages scanned:** CSS (`.css`, `.scss`, `.sass`, `.less`) and
-  JavaScript/TypeScript (`.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`).
-- **Runtimes:** Python 3.10+ (the tool); Node 16+ (the npx shim only).
-- **OS:** macOS, Linux, Windows.
+Supported: CSS (`.css`, `.scss`, `.sass`, `.less`) and JS/TS (`.js`, `.jsx`,
+`.ts`, `.tsx`, `.mjs`, `.cjs`); Python 3.10+, Node 16+ (npx shim); macOS,
+Linux, Windows.
 
 ---
 
 ## Architecture
 
-One routing engine, one context engine, one linter — no model calls anywhere.
+The self-healing loop above is the whole architecture: one router, one context
+engine, one linter — no model calls anywhere.
 
-```
-            ┌─────────────────────────────────────────────┐
-request ──► │ aip route     package.json + lockfile →     │
-            │               technology + context keys     │
-            │                                             │
-            │ aip context   packaged knowledge, section-  │
-            │               level, offline                │
-            │                                             │
-  code  ──► │ aip check     12 rules → findings + fixes   │
-            └─────────────────────────────────────────────┘
-```
+<details>
+<summary>Module map</summary>
 
-```
+```text
 aip/check.py       the linter — rules, autofix, output formats
 aip/knowledge.py   aip route and aip context
 aip/claude.py      the canonical agent instruction body (single source of truth)
@@ -260,6 +297,8 @@ aip/cli.py         command line entry point
 aip/data/          knowledge pack — ships inside the wheel, never in your repo
 npm/               npx shim (bootstraps Python, delegates to the CLI)
 ```
+
+</details>
 
 ---
 
@@ -281,24 +320,14 @@ npm/               npx shim (bootstraps Python, delegates to the CLI)
 
 - **Zero config.** No `.aiprc`, no setup, no accounts. It runs on first use.
 - **Zero dependencies.** Python stdlib only — the wheel is ~114 KB.
-- **No AI, no network.** Deterministic and offline. Route and context never
-  call a model.
-- **Fix over complaint.** A finding that cannot state its fix in one sentence
-  is not ready to ship.
+- **No AI, no network.** Deterministic and offline. Route and context never call a model.
+- **Fix over complaint.** A finding that cannot state its fix in one sentence is not ready to ship.
 - **False positives are worse than missed bugs.** A noisy linter gets disabled.
-- **Only mechanical autofixes.** `--fix` never rewrites anything requiring
-  judgement.
-- **Knowledge ships in the wheel.** `aip data/` is never copied into your
-  repository.
 
-### What this is not
-
-- **Not an AI code generator.** AIP never calls a model. Your coding agent
-  writes the code; AIP routes, informs, and validates it.
-- **Not a runtime profiler.** It reads source code. It never executes your app,
-  so it cannot measure actual frame rate.
-- **Not a replacement for testing on real hardware.** It catches known-bad
-  patterns, not everything.
+**What this is not:** not an AI code generator (your agent writes the code;
+AIP routes, informs, and validates it) · not a runtime profiler (it reads
+source, never executes your app) · not a replacement for testing on real
+hardware (it catches known-bad patterns, not everything).
 
 ---
 
@@ -306,7 +335,7 @@ npm/               npx shim (bootstraps Python, delegates to the CLI)
 
 ```bash
 git clone https://github.com/Abdullahmalik66/Animation-Intelligence-Platform-AIP
-cd aip
+cd Animation-Intelligence-Platform-AIP
 python3 -m unittest discover tests -v   # test suite
 python3 scripts/smoke.py                # cold-start sanity check
 python3 -m aip check tests/fixtures/    # see the linter fire
@@ -314,8 +343,8 @@ python3 -m aip check tests/fixtures/    # see the linter fire
 
 Good first contributions: a new rule (with a positive and a negative fixture),
 a sharper fix hint, a new context topic. See
-[`CONTRIBUTING.md`](CONTRIBUTING.md) and
-[`SECURITY.md`](SECURITY.md) for the details.
+[`CONTRIBUTING.md`](CONTRIBUTING.md) and [`SECURITY.md`](SECURITY.md) for the
+details.
 
 ## License
 
