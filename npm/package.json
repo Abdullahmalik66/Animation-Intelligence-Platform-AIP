@@ -1,5 +1,5 @@
 {
-  "name": "aip",
+  "name": "aip-cli",
   "version": "3.0.0",
   "description": "A zero-config linter for web animation code. Catches memory leaks, jank, and accessibility violations.",
   "bin": { "aip": "bin/aip.js" },

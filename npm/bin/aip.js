@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * npx aip check .
+ * npx aip-cli check .
  *
  * AIP is written in Python (stdlib only, no dependencies). This shim finds a
  * Python 3.10+, installs AIP once into a private venv under the user's cache

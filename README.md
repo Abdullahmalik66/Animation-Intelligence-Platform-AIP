@@ -8,7 +8,7 @@ layout on every frame.
 No AI. No network. No API keys. No config file.
 
 ```bash
-npx aip check src/
+npx aip-cli check src/
 ```
 
 ```
@@ -35,7 +35,7 @@ Exit code is `1` when there are errors, so it drops straight into CI.
 Nothing to install if you have Node:
 
 ```bash
-npx aip check src/
+npx aip-cli check src/
 ```
 
 Or install it properly:
@@ -45,7 +45,7 @@ pipx install aip     # or: pip install aip
 aip check src/
 ```
 
-`npx aip` bootstraps a private Python environment under `~/.cache/aip` on first
+`npx aip-cli` bootstraps a private Python environment under `~/.cache/aip` on first
 run (~5s, once). It never writes into your project. Requires Python 3.10+. Zero
 dependencies.
 

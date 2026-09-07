@@ -9,7 +9,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [3.0.0] — 2026-09-07
 
 The project is now a product: a zero-config linter for web animation code,
-installable from PyPI and runnable via `npx aip`.
+installable from PyPI and runnable via `npx aip-cli`.
 
 ### Added
 
@@ -24,7 +24,7 @@ installable from PyPI and runnable via `npx aip`.
   on demand; ships inside the wheel, never copied into user projects.
 - `aip init` / `aip init --remove` — installs the Claude Code animation skill
   as exactly one file, and removes it cleanly.
-- `npx aip` shim — bootstraps a private Python environment on first run.
+- `npx aip-cli` shim — bootstraps a private Python environment on first run.
 - Knowledge pack (skills, references, manifests, schemas) bundled as package
   data under `aip/data/`.
 
