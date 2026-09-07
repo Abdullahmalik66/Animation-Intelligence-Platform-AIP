@@ -4,20 +4,42 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aip"
-version = "2.0.0"
-description = "Animation Intelligence Platform — deterministic context-selection and orchestration layer"
+version = "3.0.0"
+description = "A zero-config linter for web animation code. Catches memory leaks, jank, and accessibility violations."
 requires-python = ">=3.10"
 license = {text = "MIT"}
 readme = "README.md"
+keywords = ["animation", "linter", "accessibility", "gsap", "css", "performance"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = []
 
-[project.optional-dependencies]
-# Live LLM backend. NOT installed by default; live integration is blocked until
-# the SDK and credentials are approved. See docs/migration.md.
-fable = ["anthropic>=0.30"]
-dev = []          # stdlib-only: unittest, no external dev deps required
+[project.urls]
+Homepage = "https://github.com/Abdullahmalik66/Animation-Intelligence-Platform-AIP-"
+Issues = "https://github.com/Abdullahmalik66/Animation-Intelligence-Platform-AIP-/issues"
+
+[project.scripts]
+aip = "aip.cli:main"
 
 [tool.setuptools]
 packages = ["aip", "aip.backends"]
+
+[tool.setuptools.package-data]
+aip = [
+    "data/skills/*/*.md",
+    "data/references/*.md",
+    "data/shared/*.md",
+    "data/manifests/*.json",
+    "data/schemas/*.json",
+    "data/integrations/*/*.md",
+    "data/examples/*/*",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

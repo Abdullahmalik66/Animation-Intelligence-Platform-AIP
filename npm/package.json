@@ -1,0 +1,14 @@
+{
+  "name": "aip",
+  "version": "3.0.0",
+  "description": "A zero-config linter for web animation code. Catches memory leaks, jank, and accessibility violations.",
+  "bin": { "aip": "bin/aip.js" },
+  "files": ["bin/aip.js"],
+  "keywords": ["animation", "linter", "accessibility", "gsap", "css", "performance", "a11y"],
+  "license": "MIT",
+  "engines": { "node": ">=16" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abdullahmalik66/Animation-Intelligence-Platform-AIP-.git"
+  }
+}

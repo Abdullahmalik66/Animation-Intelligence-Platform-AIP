@@ -1,92 +1,61 @@
-# Contributing to frontend-animation-agent-skills
+# Contributing to aip
 
-Thank you for contributing to the largest AI skill library for frontend animation development.
+Thanks for helping make `aip` better.
 
----
+## Ways to contribute
 
-## Ways to Contribute
+- **New lint rules** — catch a real animation bug class that `aip` misses today
+- **Rule improvements** — fewer false positives, sharper fix hints
+- **Bug fixes** — in the linter, the router, or the CLI
+- **Context topics** — packaged knowledge served by `aip context`
+- **Documentation** — clearer docs, better examples
 
-- **New skills** — Add a new animation library skill
-- **Improve existing skills** — Better examples, fixed errors, updated APIs
-- **New examples** — Working code examples for patterns not yet covered
-- **Bug fixes** — Fix incorrect information or broken code examples
-- **New eval cases** — Add test cases that validate AI output quality
-- **Integration guides** — Add framework-specific integration patterns
+## Getting started
 
----
-
-## Before You Start
-
-1. Read the [Architecture doc](./docs/architecture.md)
-2. Read the [Skill Authoring guide](./docs/skill-authoring.md)
-3. Check existing [skills](./skills/) to understand the format
-4. Check open issues before starting work on a new skill
-
----
-
-## Skill Contribution Process
-
-### 1. Create the skill file
-
-```
-skills/[library-name]/SKILL.md
+```bash
+git clone https://github.com/Abdullahmalik66/Animation-Intelligence-Platform-AIP-
+cd Animation-Intelligence-Platform-AIP-
+python3 -m unittest discover tests -v
+python3 -m aip check tests/fixtures/bad-animations.css
 ```
 
-Follow the template in [docs/skill-authoring.md](./docs/skill-authoring.md).
+Requires Python 3.10+. The project has zero runtime dependencies on purpose —
+do not add any without discussing it first.
 
-### 2. Self-review checklist
+## Adding a lint rule
 
-```
-□ Goal is specific and testable
-□ Return format is clear
-□ All warnings are actionable
-□ Code examples include prefers-reduced-motion
-□ Code examples include cleanup logic
-□ Code examples use named constants
-□ No TypeScript any
-□ RTCF has all four fields
-□ At least 2 few-shot examples
-□ One example covers debugging
-```
+1. Implement it in `aip/check.py` and register it in `CSS_RULES` or `JS_RULES`.
+2. Add a positive case to `tests/fixtures/bad-animations.*`.
+3. Add a negative case to `tests/fixtures/good-animations.*`.
+4. Add unit tests in `tests/test_check.py`.
 
-### 3. Open a pull request
+False positives are worse than missed bugs — a noisy linter gets disabled. A
+rule that cannot state its fix in one sentence is not ready.
 
-Use the pull request template. Include:
-- What library or skill you're adding
-- Why it belongs in this repository
-- How you tested the skill (which AI agent, which prompts)
+## Adding a context topic
 
----
+Add an entry to `TOPICS` in `aip/knowledge.py` pointing at a file under
+`aip/data/` plus the `##` headings worth loading. Context is a budget, not a
+dump — keep topics small and specific.
 
-## Code Style
+## Code style
 
-- TypeScript preferred for all code examples
-- Named constants for all durations, delays, and easing values
-- No magic numbers
+- Python 3.10+ stdlib only; no third-party imports
+- Full type hints where practical
 - Comments explain *why*, not *what*
-- No `console.log` in production examples
+- No `console.log` / debug prints in shipped code
 
----
+## Pull requests
 
-## What We Don't Accept
+- One rule or fix per PR.
+- Include before/after output for new rules.
+- All tests must pass: `python3 -m unittest discover tests -v`.
 
-- Skill files without `prefers-reduced-motion` handling in examples
-- Skill files without cleanup code in examples
-- Skills for libraries with <1000 weekly npm downloads
-- AI-generated skill files submitted without human review and testing
-- Examples that animate layout properties (`width`, `height`, `top`, `left`)
+## Reporting issues
 
----
+Open a GitHub issue with: the smallest code snippet that triggers the problem,
+the expected result, and the actual output of `aip check --format json`.
 
-## Reporting Issues
+## Code of conduct
 
-Use the GitHub issue templates for:
-- `bug-report` — Incorrect information in a skill file
-- `skill-request` — Request for a new library skill
-- `improvement` — Suggest improvements to existing content
-
----
-
-## Code of Conduct
-
-Be respectful. Disagree constructively. Focus on the content, not the person.
+Be respectful. Disagree constructively. Focus on the code, not the person.

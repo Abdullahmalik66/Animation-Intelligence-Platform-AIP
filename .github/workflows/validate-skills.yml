@@ -3,10 +3,10 @@ name: Validate Skill Files
 on:
   pull_request:
     paths:
-      - 'skills/**'
-      - 'references/**'
+      - 'aip/data/skills/**'
+      - 'aip/data/references/**'
       - '.github/prompts/**'
-      - 'adapters/**'
+      - 'aip/data/**'
 
 jobs:
   validate:
@@ -21,7 +21,7 @@ jobs:
         run: |
           EXIT_CODE=0
 
-          for skill_file in skills/*/SKILL.md; do
+          for skill_file in aip/data/skills/*/SKILL.md; do
             echo "Checking: $skill_file"
 
             REQUIRED_SECTIONS=(

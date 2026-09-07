@@ -2,43 +2,26 @@
 
 Brief description of the change.
 
-## Type of Change
+## Type of change
 
-- [ ] New skill file
-- [ ] Improvement to existing skill
-- [ ] New example
-- [ ] New integration guide
-- [ ] Bug fix (incorrect information)
-- [ ] New eval case
+- [ ] New lint rule
+- [ ] Improvement to an existing rule (accuracy, fix hint)
+- [ ] Bug fix
+- [ ] New `aip context` topic
 - [ ] Documentation
 - [ ] Other
 
-## Skill File Checklist (if adding/editing a skill)
+## For new or changed rules
 
-- [ ] Goal is specific and testable
-- [ ] Return format is unambiguous
-- [ ] Warnings use ❌ and ⚠️ correctly
-- [ ] All code examples include `prefers-reduced-motion` handling
-- [ ] All code examples include correct cleanup logic
-- [ ] All code examples use named constants (no magic numbers)
-- [ ] No TypeScript `any` in code examples
-- [ ] RTCF has all four fields (Role, Task, Constraints, Format)
-- [ ] At least 2 few-shot examples
-- [ ] One example covers a debugging scenario
+- [ ] Positive case added to `tests/fixtures/bad-animations.*`
+- [ ] Negative case added to `tests/fixtures/good-animations.*`
+- [ ] Rule states the fix in one sentence
+- [ ] Before/after output included in the PR description
 
 ## Testing
 
-Which AI agent(s) did you test this with?
+- [ ] `python3 -m unittest discover tests -v` passes
 
-- [ ] GitHub Copilot
-- [ ] Claude
-- [ ] Cursor
-- [ ] Other: ___
-
-What prompt did you use to test?
-
-What was the output? (paste or summarise)
-
-## Related Issues
+## Related issues
 
 Closes #

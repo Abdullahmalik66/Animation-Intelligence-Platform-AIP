@@ -230,29 +230,23 @@ Full:      only when justified by task complexity
 
 Prefer concise findings over exhaustive narration. If the answer can be correct in 150 words, do not use 1000.
 
-### Review-First Rule
-
-When the request is debugging, code review, lifecycle review, accessibility review, performance review, or architecture review, prefer analysis before replacement code.
-
-Use `Implementation: N/A — review task` unless code changes are explicitly requested or required to resolve the issue.
-
-Do not rewrite large components when a finding, diagnosis, or minimal patch is sufficient. The smallest correct intervention is preferred.
-
 ---
 
 ## Standard Anime.js Engineering Report
 
 ### Report Depth
 
-Depth (Targeted | Standard | Full) is selected per **Response Depth Selection and Compression** above. State it explicitly:
+State depth explicitly:
 
 ```
 Report Depth: Targeted | Standard | Full
 ```
 
-Section requirements by mode:
-- **Targeted** — Request Summary, Environment, Evidence, Finding or Implementation, Cleanup and Accessibility Impact, Validation, Assumptions, Confidence.
-- **Standard** and **Full** — use the template below; Full completes every section.
+**Targeted** — for a specific API correction, a small cleanup review, a single debugging issue, a narrow code review, or a version lookup. Required sections: Request Summary, Environment, Evidence, Finding or Implementation, Cleanup and Accessibility Impact, Validation, Assumptions, Confidence.
+
+**Standard** — for component implementation, scroll-triggered entrance, timeline, React integration, SVG animation, or performance remediation. Use the full template below.
+
+**Full** — for feature audits, architecture-sensitive implementations, migration-adjacent review, shared component libraries, platform integrations, multi-framework guidance, and production-readiness assessments. Use the full template with every section completed.
 
 Rules: do not omit decision-critical content to shorten a report; do not produce a full enterprise report for a one-line correction; every omitted section is either irrelevant by mode or marked `N/A — [reason]`.
 
@@ -392,24 +386,24 @@ Do not label an implementation production-ready when: the major version is unkno
 
 ## Warnings
 
-- Never mix Anime.js v3 and v4 APIs in one file or response.
-- Never generate package-specific production code without a verified major version.
-- Never animate during React render.
-- Never use unscoped global selectors in reusable components.
-- Never assume Anime.js cleanup discovers external resources (observers, listeners, timers, RAF, subscriptions).
-- Never describe `anime.remove()` as automatic style restoration.
-- Never double-own linked ScrollObserver cleanup.
-- Never assume `onScroll()` replaces every advanced ScrollTrigger capability.
-- Never hide critical content before successful initialisation without a failure-safe restoration path.
-- Never use a one-time reduced-motion `.matches` check for a long-lived mounted component.
-- Never add `aria-live` merely because an animation completed.
-- Never promise compositor-only execution.
-- Never state a static bundle size — use `Not measured`.
-- Never claim performance improvement without measurement.
-- Never use arbitrary timers to guess layout readiness.
-- Never invent exports, imports, methods, easing names, or version boundaries.
-- Never disable React Strict Mode to hide a lifecycle defect.
-- Always verify the installed licence, document ownership, and assign implementation readiness and confidence.
+- ❌ Never mix Anime.js v3 and v4 APIs in one file or response.
+- ❌ Never generate package-specific production code without a verified major version.
+- ❌ Never animate during React render.
+- ❌ Never use unscoped global selectors in reusable components.
+- ❌ Never assume Anime.js cleanup discovers external resources (observers, listeners, timers, RAF, subscriptions).
+- ❌ Never describe `anime.remove()` as automatic style restoration.
+- ❌ Never double-own linked ScrollObserver cleanup.
+- ❌ Never assume `onScroll()` replaces every advanced ScrollTrigger capability.
+- ❌ Never hide critical content before successful initialisation without a failure-safe restoration path.
+- ❌ Never use a one-time reduced-motion `.matches` check for a long-lived mounted component.
+- ❌ Never add `aria-live` merely because an animation completed.
+- ❌ Never promise compositor-only execution.
+- ❌ Never state a static bundle size — use `Not measured`.
+- ❌ Never claim performance improvement without measurement.
+- ❌ Never use arbitrary timers to guess layout readiness.
+- ❌ Never invent exports, imports, methods, easing names, or version boundaries.
+- ❌ Never disable React Strict Mode to hide a lifecycle defect.
+- ⚠️ Always verify the installed licence, document ownership, and assign implementation readiness and confidence.
 
 ---
 
@@ -465,7 +459,7 @@ Verify exact installed exports before using any of: `animate`, `createTimeline`,
 - A linked `onScroll()` observer may be reverted by the owning animation/timeline `revert()` **when documented for the installed version**. A separately owned ScrollObserver must be explicitly reverted.
 - Do not double-revert shared ownership without documenting idempotence and ownership.
 
-v4 changed import paths, instance methods, easing names (e.g. `easeOutCubic` becomes `outCubic`), timeline API, cleanup model, and scroll API. Never assume compatibility. Confirm every detail against the installed patch and the version-matched changelog.
+v4 changed import paths, instance methods, easing names (e.g. `easeOutCubic` → `outCubic`), timeline API, cleanup model, and scroll API. Never assume compatibility. Confirm every detail against the installed patch and the version-matched changelog.
 
 ### Anime.js v4 WAAPI Mode
 
@@ -815,48 +809,117 @@ An Anime.js implementation is complete only when: Router status established; sui
 
 ### Example 1 — v4 React Staggered Cards (Standard)
 
-Installed **v4** verified (`package.json` + lockfile); `createScope`, `animate`, `stagger`, `utils`, Scope `mediaQueries` verified. Router: Already Established. Ownership: component owns Scope; Scope owns the animation; `scope.revert()` in effect cleanup tears everything down. Accessibility: `self.matches.reduceMotion` branch leaves content visible with no motion. Progressive enhancement: content visible by default; start state applied via `utils.set()` inside the Scope callback only when motion is allowed. Validated under Strict Mode; selectors scoped to the component root. Readiness: Ready after Required Reviews (browser matrix). Confidence: High.
+Environment records installed **v4** (from `package.json` + lockfile), verified `createScope`, `animate`, `stagger`, `utils`, and Scope `mediaQueries`. Router Decision Status: Already Established. Content is visible by default; starting state applied via verified `utils.set()` inside the Scope callback only when reduced motion is not active. `scope.revert()` in effect cleanup owns all objects; the Scope callback returns extra cleanup only if it created external resources. Validated under Strict Mode. Selectors scoped to the component root. Readiness: Ready after Required Reviews (browser matrix). Confidence: High.
 
 ```tsx
-const scope = createScope({ root, mediaQueries: { reduceMotion: "(prefers-reduced-motion: reduce)" } });
-scope.add((self) => {
-  if (self.matches.reduceMotion) return;                 // content already visible
-  utils.set(".card", { opacity: 0, y: 24 });             // start state only when animating
-  animate(".card", { opacity: [0,1], y: [24,0], delay: stagger(100) });
-});
-return () => scope.revert();                             // owns all objects
+import { useEffect, useRef } from "react";
+import { animate, createScope, stagger, utils } from "animejs"; // exports verified against installed v4
+
+const DURATION = 600, EASE = "outCubic", STAGGER = 100;
+
+export function AnimatedCards() {
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!root.current) return;
+    const scope = createScope({
+      root: root.current,
+      mediaQueries: { reduceMotion: "(prefers-reduced-motion: reduce)" },
+    });
+    scope.add((self) => {
+      const cards = root.current!.querySelectorAll<HTMLElement>(".card");
+      if (self.matches.reduceMotion) {
+        cards.forEach(c => { c.style.opacity = "1"; c.style.transform = "none"; });
+        return;
+      }
+      utils.set(".card", { opacity: 0, y: 24 }); // verify utils.set in installed patch
+      animate(".card", { opacity: [0, 1], y: [24, 0], delay: stagger(STAGGER),
+        duration: DURATION, ease: EASE });
+    });
+    return () => scope.revert();
+  }, []);
+  return (
+    <div ref={root}>
+      {["Card 1", "Card 2", "Card 3"].map(l => <div key={l} className="card">{l}</div>)}
+    </div>
+  );
+}
 ```
 
 ### Example 2 — v3 React Entrance (Standard)
 
-Installed **v3** verified. Ownership: component owns the animation and the `matchMedia` listener. Accessibility: manual listener handles reduction active at mount, activated while running (stop + restore visible state), and lifted later (documented decision: do not restart). Cleanup: `anime.remove(cards)` and `removeEventListener` on unmount; explicit style restoration on reduction (remove does not restore styles). Progressive enhancement: start state applied only after motion preference confirmed. Confidence: Medium (class names assumed).
+Installed **v3** verified. Manual `matchMedia` listener handles reduction active at mount, activated while running (stop + restore visible state), and lifted later (documented decision: do not restart — one-shot entrance). `anime.remove(cards)` on unmount; explicit style restoration when reduction activates; listener removed on cleanup. Progressive enhancement: content visible, starting state applied only after motion preference confirmed. Confidence: Medium (DOM class names assumed).
 
 ```tsx
-const onChange = (e) => { if (e.matches) { anime.remove(cards); restoreVisible(cards); } };
-if (!mq.matches) { setStartState(cards); anime({ targets: cards, opacity:[0,1], translateY:[24,0], delay: anime.stagger(100) }); }
-mq.addEventListener("change", onChange);
-return () => { anime.remove(cards); mq.removeEventListener("change", onChange); };
+import { useEffect, useRef } from "react";
+import anime from "animejs"; // entry point verified
+
+const DURATION = 600, EASE = "easeOutCubic", STAGGER = 100;
+
+export function AnimatedCards() {
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!root.current) return;
+    const cards = root.current.querySelectorAll<HTMLElement>(".card");
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = (e: MediaQueryListEvent) => {
+      if (e.matches) { anime.remove(cards);
+        cards.forEach(c => { c.style.opacity = "1"; c.style.transform = "none"; }); }
+      // lifted: intentionally not restarting
+    };
+    if (mq.matches) { mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange); }
+    cards.forEach(c => { c.style.opacity = "0"; c.style.transform = "translateY(24px)"; });
+    anime({ targets: cards, opacity: [0, 1], translateY: [24, 0],
+      delay: anime.stagger(STAGGER), duration: DURATION, easing: EASE });
+    mq.addEventListener("change", onChange);
+    return () => { anime.remove(cards); mq.removeEventListener("change", onChange); };
+  }, []);
+  return <div ref={root}>{["Card 1","Card 2","Card 3"].map(l => <div key={l} className="card">{l}</div>)}</div>;
+}
 ```
 
 ### Example 3 — v4 Scroll-Synchronised Animation (Standard)
 
-Installed **v4** with `onScroll` and instance `revert()` verified. Ownership: `onScroll()` as autoplay controller → animation owns the linked ScrollObserver; Scope owns the animation; `scope.revert()` tears down both — no double cleanup, no separate `scrollObserver.revert()`. Accessibility: reduced-motion branch shows final state with no scroll sync. Layout readiness via font/image load + `refresh`, never timers. Mobile validated. No pinning claimed. Confidence: Medium.
+Installed **v4** with `onScroll` and instance `revert()` verified. Ownership: `onScroll()` supplied as autoplay controller → animation owns the linked ScrollObserver; Scope owns the animation; `scope.revert()` (or `animation.revert()`) tears down both — no double cleanup. Reduced-motion alternative: direct visible state, no scroll sync. Dynamic layout readiness handled via font/image load events, not timers; resize triggers `refresh` (verified). Mobile validated. No pin support claimed. Confidence: Medium.
 
 ```tsx
-if (self.matches.reduceMotion) utils.set(".section", { opacity: 1, y: 0 });
-else animate(".section", { opacity:[0,1], y:[20,0], ease:"linear",
-  autoplay: onScroll({ target: ".section", sync: true }) }); // linked observer owned by the animation
+// inside a lifecycle-owned Scope callback (v4; exports and linked-revert semantics verified)
+if (self.matches.reduceMotion) {
+  utils.set(".section", { opacity: 1, y: 0 });
+} else {
+  animate(".section", {
+    opacity: [0, 1], y: [20, 0], ease: "linear",
+    autoplay: onScroll({ target: ".section", enter: "bottom top", leave: "top bottom", sync: true }),
+  });
+}
+// scope.revert() reverts the animation and its linked ScrollObserver — no separate revert call
 ```
 
 ### Example 4 — v3 IntersectionObserver Entrance (Standard)
 
-Router: Exempt (supported v3 maintenance pattern — no rerouting). Ownership: component owns a one-shot `IntersectionObserver` (disconnected after trigger) and the `matchMedia` listener. Accessibility: target visible without JS; reduced motion keeps content visible with no animation. Cleanup: disconnect observer, `anime.remove(el)`, remove listener on unmount; no arbitrary timer. Confidence: Medium.
+Router Decision Status: Exempt (supported v3 maintenance pattern — no rerouting). Owned `IntersectionObserver` (one-shot, disconnected after trigger) and owned `matchMedia` listener. Target visible without JavaScript. `anime.remove(el)` on unmount; no arbitrary timer. Reduced motion: content stays visible, no animation. Confidence: Medium.
 
 ```tsx
-observer = new IntersectionObserver(([e]) => {
-  if (e.isIntersecting) { anime({ targets: el, opacity:[0,1], translateY:[20,0] }); observer.disconnect(); }
-}, { threshold: 0.1 });
-return () => { observer?.disconnect(); anime.remove(el); mq.removeEventListener("change", onChange); };
+useEffect(() => {
+  const el = ref.current; if (!el) return;
+  const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let observer: IntersectionObserver | undefined;
+  const onChange = (e: MediaQueryListEvent) => {
+    if (e.matches) { el.style.opacity = "1"; el.style.transform = "none";
+      anime.remove(el); observer?.disconnect(); }
+  };
+  if (mq.matches) { mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange); }
+  el.style.opacity = "0"; el.style.transform = "translateY(20px)";
+  observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      anime({ targets: el, opacity: [0,1], translateY: [20,0], duration: 500, easing: "easeOutCubic" });
+      observer?.disconnect();
+    }
+  }, { threshold: 0.1 });
+  observer.observe(el); mq.addEventListener("change", onChange);
+  return () => { observer?.disconnect(); anime.remove(el); mq.removeEventListener("change", onChange); };
+}, []);
 ```
 
 ### Example 5 — Unknown Version (Targeted)
@@ -892,7 +955,7 @@ Generate, debug, review, and optimise Anime.js implementations using verified ve
 **Constraints:**
 - Establish Router applicability first.
 - Inspect `package.json`, lockfile, installed exports, and installed types.
-- Never mix v3 and v4 — see **Version and Package Gate** (authoritative).
+- Never mix v3 and v4.
 - Withhold package-specific production code when version or required exports are unknown.
 - Do not animate during React render.
 - Scope reusable-component targets.

@@ -12,7 +12,9 @@ import json
 import re
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+from .paths import DATA
+
+ROOT = DATA
 
 MANIFEST_REQUIRED = ["id", "purpose", "triggers", "exclusions",
                      "required_shared_modules", "canonical_skill", "workflows"]

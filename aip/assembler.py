@@ -16,8 +16,9 @@ from pathlib import Path
 from typing import Optional
 
 from .state import AnimationProjectState
+from .paths import DATA
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = DATA
 DEFAULT_BUDGETS = {"targeted": 8000, "standard": 20000, "full": 60000}
 RELEASE_GATING = {"GOV-VERSION", "GOV-OWNERSHIP", "GOV-A11Y", "GOV-SECURITY", "GOV-READINESS"}
 

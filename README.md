@@ -1,12 +1,14 @@
-# AIP — Animation Intelligence Platform
+# aip — the web animation linter
 
-**A zero-config linter for web animation code.** It catches the bugs that ship to
-production: memory leaks, jank, and accessibility violations.
+**It catches the animation bugs that don't throw, don't fail tests, and still
+ship:** GSAP timelines that leak on every unmount, rAF loops that never stop,
+animations that ignore `prefers-reduced-motion`, `@keyframes` that trigger
+layout on every frame.
 
 No AI. No network. No API keys. No config file.
 
 ```bash
-python -m aip check src/
+npx aip check src/
 ```
 
 ```
@@ -28,47 +30,34 @@ Exit code is `1` when there are errors, so it drops straight into CI.
 
 ---
 
-## Why
+## Quick start
 
-Animation bugs are uniquely bad. They don't throw. Tests pass. Types check.
-The page just gets slower every time a user navigates, or it makes someone with
-a vestibular disorder physically sick.
-
-Existing tooling doesn't help:
-
-- ESLint doesn't know a GSAP timeline needs `revert()`.
-- Lighthouse tells you the page is slow, not which `@keyframes` did it.
-- Type checkers can't see that your `IntersectionObserver` outlives the component.
-
-AIP encodes the rules an experienced animation engineer applies in code review,
-and runs them in milliseconds.
-
----
-
-## Install
-
-Requires Python 3.10+. No dependencies.
+Nothing to install if you have Node:
 
 ```bash
-git clone https://github.com/your-org/frontend-animation-agent-skills
-cd frontend-animation-agent-skills
-python -m aip check .
+npx aip check src/
 ```
 
-A `pip install aip` / `npx aip` distribution is on the roadmap (see
-[`BUILD_PLAN.md`](BUILD_PLAN.md)).
-
----
-
-## Usage
+Or install it properly:
 
 ```bash
-python -m aip check <path>            # lint a file or directory
-python -m aip check src/ --fix        # apply safe mechanical fixes
-python -m aip check src/ --format json
+pipx install aip     # or: pip install aip
+aip check src/
 ```
 
-`--format` accepts `human` (default), `json`, `sarif`, and `github`.
+`npx aip` bootstraps a private Python environment under `~/.cache/aip` on first
+run (~5s, once). It never writes into your project. Requires Python 3.10+. Zero
+dependencies.
+
+### Commands
+
+```bash
+aip check <path>              # lint a file or directory
+aip check src/ --fix          # apply safe, mechanical fixes
+aip check src/ --format json  # machine-readable output
+```
+
+`--format` accepts `human` (default), `json`, `sarif`, and `github`:
 
 - `json` — for scripts and agents.
 - `sarif` — upload to GitHub code scanning.
@@ -77,18 +66,36 @@ python -m aip check src/ --format json
 Scanned extensions: `.css`, `.scss`, `.sass`, `.less`, `.js`, `.jsx`, `.ts`,
 `.tsx`, `.mjs`, `.cjs`. `node_modules`, build output, and dotfiles are skipped.
 
-### `--fix`
-
-Only applies changes that cannot alter behaviour — e.g. rewriting an animated
-`left`/`top` to a `transform`, or appending a `prefers-reduced-motion` block.
-Anything requiring judgement (where to put a cleanup function) is reported, never
-rewritten.
+`--fix` only applies changes that cannot alter behaviour — e.g. rewriting an
+animated `left`/`top` to a `transform`, or appending a
+`prefers-reduced-motion` block. Anything requiring judgement (where to put a
+cleanup function) is reported, never rewritten.
 
 ---
 
-## Rules
+## Why it exists
 
-### Memory leaks — `leak/*`
+Animation bugs are uniquely invisible. They don't throw. Tests pass. Types
+check. The page just gets slower every time a user navigates — or it makes
+someone with a vestibular disorder physically sick.
+
+Existing tooling doesn't reach them:
+
+- ESLint doesn't know a GSAP timeline needs `revert()`.
+- Lighthouse tells you the page is slow, not which `@keyframes` did it.
+- Type checkers can't see that your `IntersectionObserver` outlives the component.
+
+`aip` encodes the review checklist of an experienced animation engineer —
+lifecycle cleanup, accessibility, performance, asset security — and runs it in
+milliseconds, on every commit.
+
+---
+
+## Key features
+
+12 rules in four families. Every finding names the rule and states the fix.
+
+### Memory leaks — `leak/*` (errors)
 
 | Rule | Catches |
 | --- | --- |
@@ -98,30 +105,30 @@ rewritten.
 | `leak/webgl-not-disposed` | Three.js geometries/materials/textures never `dispose()`d |
 | `leak/listener-not-removed` | `addEventListener` in an effect with no matching removal |
 
-These are errors. Each one is a component that permanently retains memory after
-unmount, and they compound across navigations in an SPA.
+Each one is a component that permanently retains memory after unmount, and
+they compound across navigations in an SPA.
 
 ### Accessibility — `a11y/*`
 
 | Rule | Catches |
 | --- | --- |
-| `a11y/no-reduced-motion-fallback` | Animation with no `prefers-reduced-motion` guard |
-| `a11y/no-rapid-flash` | Flashing faster than 3Hz — a seizure risk (WCAG 2.3.1) |
-| `a11y/infinite-no-pause` | `infinite` animation longer than 5s with no pause control (WCAG 2.2.2) |
+| `a11y/no-reduced-motion-fallback` (error) | Animation with no `prefers-reduced-motion` guard |
+| `a11y/no-rapid-flash` (error) | Flashing faster than 3Hz — a seizure risk (WCAG 2.3.1) |
+| `a11y/infinite-no-pause` (warning) | `infinite` animation longer than 5s with no pause control (WCAG 2.2.2) |
 
 ### Performance — `perf/*`
 
 | Rule | Catches |
 | --- | --- |
-| `perf/no-layout-property` | Animating `left`, `top`, `width`, `height`, `margin` — forces layout on every frame |
-| `perf/no-layout-thrash` | Reading `offsetWidth`/`getBoundingClientRect` inside a rAF loop that also writes |
+| `perf/no-layout-property` (error) | Animating `left`, `top`, `width`, `height`, `margin` — forces layout on every frame |
+| `perf/no-layout-thrash` (warning) | Reading `offsetWidth`/`getBoundingClientRect` inside a rAF loop that also writes |
 
-### Other
+### Dependency hygiene — `sec/*`, `arch/*`
 
 | Rule | Catches |
 | --- | --- |
-| `sec/untrusted-asset` | Lottie/Rive assets loaded from an unpinned third-party origin |
-| `arch/over-engineered` | A heavy animation library imported for something CSS does natively |
+| `sec/untrusted-asset` (warning) | Lottie/Rive assets loaded from an unpinned third-party origin |
+| `arch/over-engineered` (warning) | A heavy animation library imported for something CSS does natively |
 
 ---
 
@@ -131,7 +138,7 @@ unmount, and they compound across navigations in an SPA.
 - uses: actions/setup-python@v5
   with:
     python-version: '3.12'
-- run: python -m aip check src/ --format github
+- run: pipx install aip && aip check src/ --format github
 ```
 
 Failing the build on `leak/*` and `a11y/*` is the point. Those are the classes of
@@ -141,27 +148,57 @@ bug that are effectively invisible in review.
 
 ## For AI agents
 
-`aip check --format json` gives an agent a precise, structured critique of code
-it just wrote, with no model call. The intended loop:
+### Claude Code
+
+```bash
+aip init
+```
+
+Writes one file — `.claude/skills/animation/SKILL.md` — and nothing else. From
+then on, whenever you ask Claude for animation work, it:
+
+1. runs `aip route "<your request>"` to pick a technology based on what your
+   project actually has installed,
+2. runs `aip context <key>` to load only the lifecycle and accessibility rules
+   for that library,
+3. writes the code,
+4. runs `aip check` and repairs its own findings before showing you anything.
+
+`aip init --remove` takes the file back out. Nothing else is left behind.
+
+### The commands underneath
+
+```bash
+aip route "cards fade in as I scroll"     # → technology + context keys (JSON)
+aip context gsap                          # → just the GSAP rules that matter
+aip context                               # → list every topic
+aip check <file> --format json            # → structured findings with fixes
+```
+
+`route` is deterministic and offline — it reads your `package.json` and lockfile,
+not a model. When it cannot decide confidently it returns `"technology": null`
+rather than guessing.
+
+`context` reads knowledge bundled inside the installed package. Those files never
+land in your repository.
+
+### Any other agent
+
+`aip check --format json` gives an agent a precise critique of code it just
+wrote, with no model call:
 
 1. Agent writes animation code.
-2. Agent runs `python -m aip check <file> --format json`.
-3. Agent reads `rule`, `message`, and `line` and repairs its own output.
-
-Each finding includes the fix, not just the complaint. One-command agent wiring
-(`aip init`) is the next milestone.
-
-The `skills/` directory holds authoring guidance for animation libraries (GSAP,
-Motion, Three.js, Lottie, Rive, Anime.js) intended to be loaded as agent context.
+2. Agent runs `aip check <file> --format json`.
+3. Agent reads `rule`, `message`, and `fix_hint` and repairs its own output.
 
 ---
 
 ## What this is not
 
-Being direct about scope, because the repo previously overpromised:
+Scope, stated plainly:
 
-- **Not an AI code generator.** `aip run` exists but routes requests against a
-  mock provider. Treat it as experimental.
+- **Not an AI code generator.** A hidden, experimental `aip run` routes requests
+  against a mock provider. It is not part of the product yet.
 - **Not a runtime profiler.** It reads source code. It never executes your app,
   so it cannot measure actual frame rate.
 - **Not a replacement for testing on real hardware.** It catches known-bad
@@ -175,10 +212,12 @@ The linter is the product. Everything else is in progress.
 
 ```
 aip/check.py       the linter — rules, autofix, output formats
+aip/knowledge.py   `aip route` and `aip context`
+aip/claude.py      `aip init` — the Claude Code skill
 aip/cli.py         command line entry point
-skills/            per-library animation guidance for agents
-references/        accessibility, performance, browser support notes
-manifests/         library capability metadata
+aip/data/          bundled knowledge (skills, references, manifests) — ships
+                   inside the wheel, never copied into your project
+npm/               npx shim (bootstraps Python, delegates to the CLI)
 tests/             linter tests + good/bad fixtures
 scripts/smoke.py   cold-start sanity check
 ```
@@ -191,12 +230,26 @@ python scripts/smoke.py                # cold-start sanity check
 python -m aip check tests/fixtures/    # see the linter fire
 ```
 
+### Releasing
+
+```bash
+python -m build                        # wheel + sdist into dist/
+twine upload dist/*                    # PyPI
+cd npm && npm publish                  # npx shim (version must match)
+```
+
+The npm shim pins `aip==<its own version>`, so publish PyPI first.
+
 Adding a rule: write it in `aip/check.py`, register it in `CSS_RULES` or
 `JS_RULES`, then add a positive case to `tests/fixtures/bad-animations.*` **and**
 a negative case to `tests/fixtures/good-animations.*`. False positives are worse
 than missed bugs — a noisy linter gets disabled.
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`BUILD_PLAN.md`](BUILD_PLAN.md).
+Adding a context topic: add an entry to `TOPICS` in `aip/knowledge.py` pointing
+at a file under `aip/data/` and the `##` headings worth loading. Keep it small —
+context is a budget, not a dump.
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## License
 

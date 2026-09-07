@@ -15,7 +15,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-ROOT = Path(__file__).resolve().parent.parent
+from .paths import DATA
+
+ROOT = DATA
 ALLOWED_ROOTS = ("skills/", "references/", "shared/", "examples/", "integrations/")
 
 

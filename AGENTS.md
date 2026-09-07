@@ -217,11 +217,11 @@ Convert the animation from one library to another. Output:
 
 ## References
 
-- [Library Decision Matrix](./references/library-decision-matrix.md)
-- [Accessibility Reference](./references/accessibility.md)
-- [Performance Reference](./references/performance.md)
-- [Browser Support Reference](./references/browser-support.md)
-- [Security Reference](./references/security.md)
+- [Library Decision Matrix](aip/data/references/library-decision-matrix.md)
+- [Accessibility Reference](aip/data/references/accessibility.md)
+- [Performance Reference](aip/data/references/performance.md)
+- [Browser Support Reference](aip/data/references/browser-support.md)
+- [Security Reference](aip/data/references/security.md)
 
 ---
 
@@ -229,16 +229,16 @@ Convert the animation from one library to another. Output:
 
 Deep skill knowledge is in the `skills/` directory:
 
-- [`skills/animation-router/SKILL.md`](./skills/animation-router/SKILL.md)
-- [`skills/gsap/SKILL.md`](./skills/gsap/SKILL.md)
-- [`skills/motion-react/SKILL.md`](./skills/motion-react/SKILL.md)
-- [`skills/threejs/SKILL.md`](./skills/threejs/SKILL.md)
-- [`skills/rive/SKILL.md`](./skills/rive/SKILL.md)
-- [`skills/animejs/SKILL.md`](./skills/animejs/SKILL.md)
-- [`skills/motion/SKILL.md`](./skills/motion/SKILL.md)
-- [`skills/lottie/SKILL.md`](./skills/lottie/SKILL.md)
-- [`skills/animation-accessibility/SKILL.md`](./skills/animation-accessibility/SKILL.md)
-- [`skills/animation-performance/SKILL.md`](./skills/animation-performance/SKILL.md)
-- [`skills/animation-debugging/SKILL.md`](./skills/animation-debugging/SKILL.md)
-- [`skills/animation-migration/SKILL.md`](./skills/animation-migration/SKILL.md)
-- [`skills/animation-code-review/SKILL.md`](./skills/animation-code-review/SKILL.md)
+- [`skills/animation-router/SKILL.md`](aip/data/skills/animation-router/SKILL.md)
+- [`skills/gsap/SKILL.md`](aip/data/skills/gsap/SKILL.md)
+- [`skills/motion-react/SKILL.md`](aip/data/skills/motion-react/SKILL.md)
+- [`skills/threejs/SKILL.md`](aip/data/skills/threejs/SKILL.md)
+- [`skills/rive/SKILL.md`](aip/data/skills/rive/SKILL.md)
+- [`skills/animejs/SKILL.md`](aip/data/skills/animejs/SKILL.md)
+- [`skills/motion/SKILL.md`](aip/data/skills/motion/SKILL.md)
+- [`skills/lottie/SKILL.md`](aip/data/skills/lottie/SKILL.md)
+- [`skills/animation-accessibility/SKILL.md`](aip/data/skills/animation-accessibility/SKILL.md)
+- [`skills/animation-performance/SKILL.md`](aip/data/skills/animation-performance/SKILL.md)
+- [`skills/animation-debugging/SKILL.md`](aip/data/skills/animation-debugging/SKILL.md)
+- [`skills/animation-migration/SKILL.md`](aip/data/skills/animation-migration/SKILL.md)
+- [`skills/animation-code-review/SKILL.md`](aip/data/skills/animation-code-review/SKILL.md)

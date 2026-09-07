@@ -1,0 +1,10 @@
+# Ship only the package. Research artefacts stay on GitHub.
+include LICENSE
+include README.md
+
+prune tests
+prune docs
+prune evals
+prune scripts
+prune npm
+global-exclude *.pyc __pycache__ .DS_Store

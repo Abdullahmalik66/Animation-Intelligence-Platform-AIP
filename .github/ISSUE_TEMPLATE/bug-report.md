@@ -1,34 +1,37 @@
 ---
-name: Bug Report
-about: Incorrect information or broken code in a skill file
+name: Bug report
+about: A false positive, missed bug, or crash in aip
 title: '[BUG] '
 labels: bug
 assignees: ''
 ---
 
-## Skill File
+## What happened
 
-Which skill file contains the issue?
-e.g., `skills/gsap/SKILL.md`
+- [ ] False positive (aip flags code that is actually fine)
+- [ ] False negative (aip misses a bug it should catch)
+- [ ] Crash or bad output
 
-## What Is Wrong
+## Minimal reproduction
 
-Describe what is incorrect, outdated, or broken.
+The smallest file that triggers the problem:
 
-## What Should It Say
+```text
+(paste the code)
+```
 
-Provide the correct information or code.
+## Actual output
 
-## AI Agent Used
+```text
+(paste `aip check <file> --format json` output)
+```
 
-Which AI agent revealed this issue?
-- [ ] GitHub Copilot
-- [ ] Claude
-- [ ] Cursor
-- [ ] Codex
-- [ ] Gemini
-- [ ] Other: ___
+## Expected
 
-## Prompt Used
+What should `aip` have reported (or not reported)?
 
-What prompt triggered the incorrect output?
+## Environment
+
+- aip version (`aip --version`):
+- Python version:
+- OS:

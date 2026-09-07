@@ -1,4 +1,6 @@
-"""Animation Intelligence Platform — deterministic orchestration layer.
+"""Animation Intelligence Platform — a linter for web animation code.
 
-Stdlib-only. Canonical knowledge remains in skills/ and shared/.
+Stdlib-only. `aip check` requires no AI, no network, and no credentials.
 """
+
+__version__ = "3.0.0"

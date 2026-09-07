@@ -1,8 +1,37 @@
 # Changelog
 
-All notable changes to `frontend-animation-agent-skills` will be documented here.
+All notable changes to `aip` will be documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+---
+
+## [3.0.0] — 2026-09-07
+
+The project is now a product: a zero-config linter for web animation code,
+installable from PyPI and runnable via `npx aip`.
+
+### Added
+
+- `aip check` — 12 static-analysis rules across memory leaks (`leak/*`),
+  accessibility (`a11y/*`), performance (`perf/*`), and dependency hygiene
+  (`sec/*`, `arch/*`). No AI, no network, no config file.
+- `--fix` — safe, behaviour-preserving autofixes only.
+- Output formats: `human`, `json`, `sarif`, `github`.
+- `aip route` — deterministic, offline technology decision from a plain-language
+  request, based on the project's actual `package.json` and lockfile.
+- `aip context` — packaged, section-level animation knowledge (15 topics) served
+  on demand; ships inside the wheel, never copied into user projects.
+- `aip init` / `aip init --remove` — installs the Claude Code animation skill
+  as exactly one file, and removes it cleanly.
+- `npx aip` shim — bootstraps a private Python environment on first run.
+- Knowledge pack (skills, references, manifests, schemas) bundled as package
+  data under `aip/data/`.
+
+### Removed
+
+- Per-agent adapter directories (`adapters/`) — superseded by `aip init` and
+  `aip context`; other agent integrations are not yet shipped.
 
 ---
 
