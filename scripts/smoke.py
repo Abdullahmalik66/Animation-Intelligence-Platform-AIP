@@ -61,17 +61,14 @@ cli_ok = subprocess.run(
 check("CLI exits 0 on clean code", cli_ok.returncode == 0,
       f"got {cli_ok.returncode}")
 
-# 5. Traces never land in the repo
-from aip.orchestrator import TRACE_PATH  # noqa: E402
-check("traces stay out of the repo", str(ROOT) not in str(TRACE_PATH),
-      str(TRACE_PATH))
-
-# 6. Deleted modules stay deleted
-for gone in ("aip/backends/fable.py", "aip/pipeline.py", "aip/router.py",
-             "aip/validators2.py", "platform"):
+# 5. Deleted modules stay deleted
+for gone in ("aip/backends", "aip/pipeline.py", "aip/router.py",
+             "aip/gateway.py", "aip/orchestrator.py", "aip/assembler.py",
+             "aip/retrieval.py", "aip/validators.py", "aip/schema_check.py",
+             "aip/inventory.py", "platform"):
     check(f"{gone} removed", not (ROOT / gone).exists())
 
-# 7. Test suite is green
+# 6. Test suite is green
 suite = subprocess.run(
     [sys.executable, "-m", "unittest", "discover", "tests", "-v"],
     capture_output=True, text=True, cwd=ROOT)

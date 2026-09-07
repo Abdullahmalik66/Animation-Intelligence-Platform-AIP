@@ -23,7 +23,7 @@ SIGNAL_PATTERNS: list[tuple[str, str, str]] = [
     ("trigger", "scroll", r"\bscroll(s|ing|ed)?\b"),
     ("trigger", "hover", r"\bhover|mouse over\b"),
     ("trigger", "load", r"\bwhile.*load|loading\b"),
-    ("choreography", "entrance", r"\b(appear|fade in|show up|entrance|enter)\b"),
+    ("choreography", "entrance", r"\b(appear|fade in|show up|entrance|enter|reveal)\b"),
     ("choreography", "exit", r"\b(disappear|fade out|removed|exit)\b"),
     ("choreography", "loop", r"\b(spin|rotat|loop)\w*\b"),
     ("target", "3d", r"\b3.?d\b|product viewer|webgl"),
@@ -138,6 +138,14 @@ def route(state: AnimationProjectState,
         return _decision(state, signals, "functional", "library",
                          _pick(installed, ["motion-react"], "css"),
                          workflow, "Enter/exit presence in React", Confidence.MEDIUM)
+    if "entrance" in values("choreography") and "scroll" in values("trigger"):
+        tech = _pick(installed, ["motion-react"], "") \
+            if state.framework in ("react", "nextjs") else ""
+        tech = tech or _pick(installed, ["gsap", "animejs"], "css")
+        return _decision(state, signals, "functional",
+                         "viewport-triggered" if tech != "css" else "native-css",
+                         tech, workflow, "Scroll-triggered reveal on viewport entry",
+                         Confidence.MEDIUM)
     if "entrance" in values("choreography"):
         return _decision(state, signals, "functional", "native-css", "css",
                          workflow, "Simple entrance — CSS first", Confidence.MEDIUM)

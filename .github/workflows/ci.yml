@@ -42,3 +42,12 @@ jobs:
             exit 1
           fi
           echo "Linter correctly rejected known-bad code."
+
+      - name: Knowledge topics resolve
+        run: |
+          python - <<'EOF'
+          from aip.knowledge import TOPICS, get_context
+          for topic in TOPICS:
+              assert get_context(topic).strip(), f"empty topic: {topic}"
+          print(f"OK: all {len(TOPICS)} context topics resolve")
+          EOF

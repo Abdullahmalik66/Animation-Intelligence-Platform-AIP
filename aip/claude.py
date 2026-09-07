@@ -1,15 +1,27 @@
 """`aip init` — install the Claude Code animation skill.
 
-Writes exactly one file: `.claude/skills/animation/SKILL.md`.
+Writes exactly one file: `.claude/skills/animation/SKILL.md` (project) or
+`~/.claude/skills/animation/SKILL.md` (--global).
 Nothing else is created, and nothing existing is touched.
+
+The skill is rendered with whichever command actually reaches AIP on this
+machine (`aip` on PATH, or the `npx aip-cli` shim), so it works for pipx,
+pip, npm, and npx users alike.
 """
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 SKILL_REL = Path(".claude/skills/animation/SKILL.md")
 
-SKILL = """---
+# One-line summary used by every adapter that supports a description field.
+DESCRIPTION = ("Use when writing, reviewing, or fixing web animation code — "
+               "CSS transitions, keyframes, GSAP, Motion/Framer Motion, "
+               "Three.js, Lottie, Rive, Anime.js, requestAnimationFrame "
+               "loops, scroll effects, or any UI motion.")
+
+_FRONTMATTER = """---
 name: animation
 description: >-
   Use when writing, reviewing, or fixing web animation code — CSS transitions,
@@ -17,7 +29,11 @@ description: >-
   requestAnimationFrame loops, scroll effects, or any UI motion.
 ---
 
-# Animation Engineering
+"""
+
+# The canonical, platform-neutral instruction body. Single source of truth
+# for every agent adapter (Claude, Copilot, Cursor, Windsurf, AGENTS.md, …).
+BODY = """# Animation Engineering
 
 You already know how to write animation code. The `aip` tool supplies the three
 things you cannot get from the model alone: which technology this project can
@@ -107,24 +123,69 @@ not help. Say what is blocking you.
 """
 
 
-def init(target_dir: str = ".", force: bool = False) -> tuple[Path, str]:
-    """Write the Claude skill. Returns (path, action)."""
-    path = Path(target_dir).expanduser().resolve() / SKILL_REL
+def resolve_command() -> str:
+    """Return the invocation that actually reaches AIP on this machine.
+
+    Preference order:
+      1. `aip`      — pipx / pip / npm -g installs put it on PATH.
+      2. `npx aip-cli` — the npm shim; works for npx-only users.
+    Falls back to `aip` (with the skill's own error-handling clause covering
+    the truly-broken case) rather than ever writing a command we invented.
+    """
+    if shutil.which("aip"):
+        return "aip"
+    if shutil.which("npx"):
+        return "npx aip-cli"
+    return "aip"
+
+
+def render_body(command: str = "aip") -> str:
+    """Render the canonical instruction body with a concrete AIP invocation."""
+    if command == "aip":
+        return BODY
+    import re
+    return re.sub(r"\baip (route|context|check)\b", f"{command} \\1", BODY)
+
+
+def render_skill(command: str = "aip") -> str:
+    """Render the Claude skill (frontmatter + body)."""
+    return _FRONTMATTER + render_body(command)
+
+
+# Canonical rendering — used by tests and by installs where `aip` is on PATH.
+SKILL = render_skill("aip")
+
+
+def skill_path(target_dir: str | None = ".") -> Path:
+    """Resolve the skill location. `None` targets the global ~/.claude."""
+    base = Path.home() if target_dir is None else Path(target_dir).expanduser().resolve()
+    return base / SKILL_REL
+
+
+def init(target_dir: str | None = ".", force: bool = False,
+         command: str | None = None) -> tuple[Path, str]:
+    """Write the Claude skill. Returns (path, action).
+
+    `target_dir=None` installs globally to ~/.claude/skills/animation/.
+    `command=None` auto-detects how AIP is reachable on this machine.
+    """
+    path = skill_path(target_dir)
+    content = render_skill(command if command is not None else resolve_command())
 
     if path.exists() and not force:
-        if path.read_text(encoding="utf-8") == SKILL:
+        if path.read_text(encoding="utf-8") == content:
             return path, "unchanged"
         return path, "exists"
 
     path.parent.mkdir(parents=True, exist_ok=True)
     action = "updated" if path.exists() else "created"
-    path.write_text(SKILL, encoding="utf-8")
+    path.write_text(content, encoding="utf-8")
     return path, action
 
 
-def remove(target_dir: str = ".") -> tuple[Path, str]:
+def remove(target_dir: str | None = ".") -> tuple[Path, str]:
     """Remove the skill file and any directories it alone occupied."""
-    path = Path(target_dir).expanduser().resolve() / SKILL_REL
+    path = skill_path(target_dir)
     if not path.exists():
         return path, "absent"
     path.unlink()
