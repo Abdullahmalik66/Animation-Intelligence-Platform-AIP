@@ -21,8 +21,8 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/Abdullahmalik66/aip"
-Issues = "https://github.com/Abdullahmalik66/aip/issues"
+Homepage = "https://github.com/Abdullahmalik66/Animation-Intelligence-Platform-AIP"
+Issues = "https://github.com/Abdullahmalik66/Animation-Intelligence-Platform-AIP/issues"
 
 [project.scripts]
 aip = "aip.cli:main"

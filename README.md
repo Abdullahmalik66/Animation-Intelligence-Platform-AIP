@@ -305,7 +305,7 @@ npm/               npx shim (bootstraps Python, delegates to the CLI)
 ## Contributing
 
 ```bash
-git clone https://github.com/Abdullahmalik66/aip
+git clone https://github.com/Abdullahmalik66/Animation-Intelligence-Platform-AIP
 cd aip
 python3 -m unittest discover tests -v   # test suite
 python3 scripts/smoke.py                # cold-start sanity check
